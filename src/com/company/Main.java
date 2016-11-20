@@ -2,6 +2,7 @@ package com.company;
 
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 public class Main {
 
@@ -53,9 +54,109 @@ public class Main {
                     System.out.println(Arrays.toString(array));
                 }
                 else System.out.println("The array is null");
-            } else System.out.println("Invalid command");
+            } else if (input.equalsIgnoreCase("insertionsort")){
+                if (array!=null){
+                    System.out.println("Performed Insertion sort. "+ InsertionSort(array).toString());
+                    isSorted = true;
+                    System.out.println("The array after sorting:");
+                    System.out.println(Arrays.toString(array));
+                }
+                else System.out.println("The array is null");
+            } else if (input.equalsIgnoreCase("binaryinsertionsort")) {
+                if (array != null) {
+                    System.out.println("Performed Insertion sort. " + BinaryInsertionSort(array).toString());
+                    isSorted = true;
+                    System.out.println("The array after sorting:");
+                    System.out.println(Arrays.toString(array));
+                } else System.out.println("The array is null");
+            } else if(input.matches("^(?i:getstat)\\s\\d+\\s\\d+(?i:((\\sinsertionsort)|(\\sbinaryinsertionsort)))+$")){
+                String[] inputArray = input.split(" ");
+                PrintStats(Integer.parseInt(inputArray[1]),Integer.parseInt(inputArray[2]), Arrays.copyOfRange(inputArray, 3, inputArray.length));
+            }
+            else System.out.println("Invalid command");
 
             input = scanner.nextLine();
+        }
+    }
+
+    static void PrintStats(int arraySize, int numOfIterations, String[] listOfSorts){
+        int[] tempArray;
+        SortStat tempSortStat;
+        for(String sort:listOfSorts){
+            switch (sort.toLowerCase()) {
+                case "insertionsort" :{
+                    int worstNumOfSwaps=-1, bestNumOfSwaps=-1, worstNumOfComparisons=-1,
+                            bestNumOfComparisons=-1;
+                    double avgNumOfSwaps, avgNumOfComparisons;
+                    int[] numsOfSwaps = new int[numOfIterations];
+                    int[] numsOfComparisons = new int[numOfIterations];
+                    for (int i =0; i< numOfIterations; i++){
+                        tempArray = GetRandomArray(arraySize);
+                        tempSortStat = InsertionSort(tempArray);
+                        numsOfComparisons[i] = tempSortStat.numberOfComparisons;
+                        numsOfSwaps[i] = tempSortStat.numberOfSwaps;
+                        if(tempSortStat.numberOfComparisons>worstNumOfComparisons){
+                            worstNumOfComparisons=tempSortStat.numberOfComparisons;
+                        }
+                        if(tempSortStat.numberOfComparisons<bestNumOfComparisons||bestNumOfComparisons==-1){
+                            bestNumOfComparisons=tempSortStat.numberOfComparisons;
+                        }
+                        if(tempSortStat.numberOfSwaps>worstNumOfSwaps){
+                            worstNumOfSwaps=tempSortStat.numberOfSwaps;
+                        }
+                        if(tempSortStat.numberOfSwaps<bestNumOfSwaps||bestNumOfSwaps==-1){
+                            bestNumOfSwaps=tempSortStat.numberOfSwaps;
+                        }
+                        
+                        
+                    }
+                    avgNumOfComparisons= IntStream.of(numsOfComparisons).sum()/numOfIterations;
+                    avgNumOfSwaps = IntStream.of(numsOfSwaps).sum()/numOfIterations;
+
+                    System.out.println("INSERTIONS SORT");
+                    System.out.println("Number of iterations: " + numOfIterations + ". Array size: " + arraySize);
+                    System.out.println("NUMBER OF COMPARISONS: best: " + bestNumOfComparisons +" worst: " + worstNumOfComparisons + " average: "+ avgNumOfComparisons);
+                    System.out.println("NUMBER OF SWAPS: best: " + bestNumOfSwaps +" worst: " + worstNumOfSwaps + " average: "+ avgNumOfSwaps);
+                    System.out.println();
+                    break;
+                }
+                case "binaryinsertionsort" :{
+                    int worstNumOfSwaps=-1, bestNumOfSwaps=-1, worstNumOfComparisons=-1,
+                            bestNumOfComparisons=-1;
+                    double avgNumOfSwaps, avgNumOfComparisons;
+                    int[] numsOfSwaps = new int[numOfIterations];
+                    int[] numsOfComparisons = new int[numOfIterations];
+                    for (int i =0; i< numOfIterations; i++){
+                        tempArray = GetRandomArray(arraySize);
+                        tempSortStat = BinaryInsertionSort(tempArray);
+                        numsOfComparisons[i] = tempSortStat.numberOfComparisons;
+                        numsOfSwaps[i] = tempSortStat.numberOfSwaps;
+                        if(tempSortStat.numberOfComparisons>worstNumOfComparisons){
+                            worstNumOfComparisons=tempSortStat.numberOfComparisons;
+                        }
+                        if(tempSortStat.numberOfComparisons<bestNumOfComparisons||bestNumOfComparisons==-1){
+                            bestNumOfComparisons=tempSortStat.numberOfComparisons;
+                        }
+                        if(tempSortStat.numberOfSwaps>worstNumOfSwaps){
+                            worstNumOfSwaps=tempSortStat.numberOfSwaps;
+                        }
+                        if(tempSortStat.numberOfSwaps<bestNumOfSwaps||bestNumOfSwaps==-1){
+                            bestNumOfSwaps=tempSortStat.numberOfSwaps;
+                        }
+
+
+                    }
+                    avgNumOfComparisons= IntStream.of(numsOfComparisons).sum()/numOfIterations;
+                    avgNumOfSwaps = IntStream.of(numsOfSwaps).sum()/numOfIterations;
+
+                    System.out.println("BINARY INSERTIONS SORT");
+                    System.out.println("Number of iterations: " + numOfIterations + ". Array size: " + arraySize);
+                    System.out.println("NUMBER OF COMPARISONS: best: " + bestNumOfComparisons +" worst: " + worstNumOfComparisons + " average: "+ avgNumOfComparisons);
+                    System.out.println("NUMBER OF SWAPS: best: " + bestNumOfSwaps +" worst: " + worstNumOfSwaps + " average: "+ avgNumOfSwaps);
+                    System.out.println();
+                    break;
+                }
+            }
         }
     }
 
@@ -127,4 +228,53 @@ public class Main {
         return result;
     }
 
+    static SortStat InsertionSort(int[] array){
+        int numberOfComparisions = 0;
+        int numberOfSwaps = 0;
+        for (int i = 1; i<array.length; i++){
+            int j = i;
+            numberOfComparisions++;
+            while (j>0&&array[j-1]>array[j]){
+                numberOfComparisions++;
+                numberOfSwaps++;
+                int temp = array[j];
+                array[j] = array[j-1];
+                array[j-1] = temp;
+                j--;
+            }
+
+        }
+        return new SortStat(numberOfComparisions, numberOfSwaps);
+
+    }
+
+    static SortStat BinaryInsertionSort(int[] array)
+    {
+        int numberOfComparisons = 0;
+        int numberOfSwaps = 0;
+        for (int i = 0; i < array.length; i++)
+        {
+            int temp = array[i]; int left = 0; int right = i - 1;
+            while (left <= right)
+            {
+                int m = (left + right) / 2;
+                if (temp < array[m])
+                    right = m - 1;
+                else left = m + 1;
+                numberOfComparisons++;
+            }
+
+            for (int j = i - 1; j >= left; j--)
+            {
+                array[j + 1] = array[j]; // сдвиг элементов
+                numberOfSwaps++;
+            }
+
+            array[left] = temp;
+            numberOfSwaps++;
+        }
+        return new SortStat(numberOfComparisons, numberOfSwaps);
+    }
+
 }
+
